@@ -47,7 +47,7 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
-
+// ================================================================================================================ GET
 app.MapGet("/serviceTickets", () =>
 {
     return serviceTickets;
@@ -96,5 +96,17 @@ app.MapGet("/employees/{id}", (int id) =>
     employee.ServiceTickets = serviceTickets.Where(st => st.EmployeeId == id).ToList();
     return Results.Ok(employee);
 });
+
+// ================================================================================================================ POST
+
+app.MapPost("/servicetickets", (ServiceTicket serviceTicket) =>
+{
+    // creates a new id (When we get to it later, our SQL database will do this for us like JSON Server did!)
+    serviceTicket.Id = serviceTickets.Max(st => st.Id) + 1;
+    serviceTickets.Add(serviceTicket);
+    return serviceTicket;
+});
+
+
 
 app.Run();
