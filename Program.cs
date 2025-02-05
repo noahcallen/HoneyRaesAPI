@@ -20,7 +20,7 @@ List<ServiceTicket> serviceTickets = new List<ServiceTicket> {
     new ServiceTicket { Id = 1, CustomerId = 1, EmployeeId = 1, Description = "BAD", Emergency = true, DateCompleted= DateTime.Now },
     new ServiceTicket { Id = 2, CustomerId = 2, EmployeeId = 2, Description = "GOOD", Emergency = false, DateCompleted= DateTime.Now },
     new ServiceTicket { Id = 3, CustomerId = 3, EmployeeId = 1, Description = "GOOD", Emergency = false, DateCompleted= DateTime.Now },
-    new ServiceTicket { Id = 4, CustomerId = 4, Description = "DECENT", Emergency = false, DateCompleted= DateTime.Now },
+    new ServiceTicket { Id = 4, CustomerId = 1, Description = "DECENT", Emergency = false, DateCompleted= DateTime.Now },
     new ServiceTicket { Id = 5, CustomerId = 5, Description = "DECENT", Emergency = false },
 };
 
@@ -99,7 +99,7 @@ app.MapGet("/employees/{id}", (int id) =>
 
 // ================================================================================================================ POST
 
-app.MapPost("/servicetickets", (ServiceTicket serviceTicket) =>
+app.MapPost("/serviceTickets", (ServiceTicket serviceTicket) =>
 {
     // creates a new id (When we get to it later, our SQL database will do this for us like JSON Server did!)
     serviceTicket.Id = serviceTickets.Max(st => st.Id) + 1;
@@ -107,7 +107,7 @@ app.MapPost("/servicetickets", (ServiceTicket serviceTicket) =>
     return serviceTicket;
 });
 
-// ================================================================================================================ POST
+// ================================================================================================================ DELETE
 
 app.MapDelete("/serviceTickets/{id}", (int id) =>
 {
@@ -119,6 +119,34 @@ app.MapDelete("/serviceTickets/{id}", (int id) =>
     }
     serviceTickets.Remove(ticket);
     return Results.Ok(ticket);
+});
+
+// ================================================================================================================ PUT
+
+app.MapPut("/serviceTickets/{id}", (int id, ServiceTicket serviceTicket) =>
+{
+    ServiceTicket ticketToUpdate = serviceTickets.FirstOrDefault(st => st.Id == id);
+    int ticketIndex = serviceTickets.IndexOf(ticketToUpdate);
+    if (ticketToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    //the id in the request route doesn't match the id from the ticket in the request body. That's a bad request!
+    if (id != serviceTicket.Id)
+    {
+        return Results.BadRequest();
+    }
+    serviceTickets[ticketIndex] = serviceTicket;
+    return Results.Ok();
+});
+
+// ================================================================================================================ CUSTOM
+
+ app.MapPost("/serviceTickets/{id}/complete", (int id) =>
+{
+    ServiceTicket ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
+
+    ticketToComplete.DateCompleted = DateTime.Today;
 });
 
 app.Run();
